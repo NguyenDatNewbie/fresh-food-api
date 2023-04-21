@@ -12,7 +12,7 @@ public class Account implements Serializable {
     private Long id;
     @Column(nullable=false,unique = true)
     private String username;
-    @Column(nullable = false)
+    @Column()
     private String password;
     private Boolean role;
 

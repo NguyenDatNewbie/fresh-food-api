@@ -32,34 +32,30 @@ public class UserController {
                                                  @RequestParam String email){
     String message="";
 
-        try {
-            Account account = repository.findByUsername(username);
-            if(account!=null)
-                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                        new ResponseObject("failed","username đã tồn tại","")
-                );
-            account = new Account();
-            account.setUsername(username);
-            account.setPassword(password);
-            account.setRole(false); // Default user
-            Account checkAccount = repository.save(account);
-            if(checkAccount!=null) {
-                InfoUser infoUser = new InfoUser();
-                infoUser.setEmail(email);
-                infoUser.setName(name);
-                infoUser.setAccount(checkAccount);
-
-                InfoUser result = infoUserRepository.save(infoUser);
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("success", "Tạo tài khoản thành công",result));
-            }
-        }
-        catch (Exception exception) {
-           message = exception.getMessage();
-        }
+    Account account = repository.findByUsername(username);
+    if(account!=null)
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                new ResponseObject("failed", message, "")
+                new ResponseObject("failed","username đã tồn tại","")
         );
+    account = new Account();
+    account.setUsername(username);
+    account.setPassword(password);
+    account.setRole(false); // Default user
+    Account checkAccount = repository.save(account);
+    if(checkAccount!=null) {
+        InfoUser infoUser = new InfoUser();
+        infoUser.setEmail(email);
+        infoUser.setName(name);
+        infoUser.setAccount(checkAccount);
+
+        InfoUser result = infoUserRepository.save(infoUser);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("success", "Tạo tài khoản thành công",result));
+    }
+    repository.delete(account.getId());
+    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+            new ResponseObject("failed", "Khởi tạo không thành công", "")
+    );
     }
 
     @PostMapping(path="/login",consumes = {MediaType.ALL_VALUE})
