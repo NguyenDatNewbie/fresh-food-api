@@ -16,13 +16,6 @@ public class Category {
     @Column(length = 64)
     private String name;
 
-    @OneToOne
-    @JoinColumn(name = "parent_id")
-    private Category parent;
-
-    @OneToMany(mappedBy = "parent")
-    private List<Category> children = new ArrayList<>();
-
 
     public Long getId() {
         return id;
@@ -40,25 +33,4 @@ public class Category {
         this.name = name;
     }
 
-    public Long getParent() {
-        if(parent!=null)
-            return parent.getId();
-        return (long) -1;
-    }
-
-    public void setParent(Category parent) {
-        this.parent = parent;
-    }
-
-    public int getChildren() {
-        return children.size();
-    }
-
-    public void setChildren(List<Category> children) {
-        this.children = children;
-    }
-
-    public void addChild(Category children) {
-        this.children.add(children);
-    }
 }

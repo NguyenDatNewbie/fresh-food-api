@@ -22,17 +22,14 @@ public class CategoryController {
         return repository.findAll();
     }
 
-    @GetMapping("/parent")
-    List<Category> getAllParent(){
-        return repository.getAllParent();
-    }
-    @GetMapping("/parent/{parent_id}")
-    List<Category> getChildrenByParent(@PathVariable Long parent_id){
-        return repository.getChildrenByParent(parent_id);
-    }
     @GetMapping("/{id}")
     Category getById(@PathVariable Long id) {
         return repository.findOne(id);
+    }
+
+    @GetMapping("/{name}")
+    Category getByName(@PathVariable String name) {
+        return repository.findCategoriesByName(name);
     }
 
 // comment

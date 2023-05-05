@@ -47,12 +47,19 @@ public class UserController {
         infoUser.setEmail(email);
         infoUser.setName(name);
         infoUser.setAccount(checkAccount);
-
-        InfoUser result = infoUserRepository.save(infoUser);
-        return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("success", "Tạo tài khoản thành công",result));
+        try {
+            InfoUser result = infoUserRepository.save(infoUser);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("success", "Tạo tài khoản thành công", result));
+        }
+        catch(Exception exception){
+            repository.delete(checkAccount.getId());
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("failed", "Khởi tạo không thành công", "")
+            );
+        }
     }
-    repository.delete(account.getId());
+
     return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
             new ResponseObject("failed", "Khởi tạo không thành công", "")
     );
