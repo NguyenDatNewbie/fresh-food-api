@@ -1,5 +1,6 @@
 package com.freshfood.API_FreshShop.Controller;
 
+import com.freshfood.API_FreshShop.Repository.InventoryRepository;
 import com.freshfood.API_FreshShop.Service.IPaymentService;
 import com.freshfood.API_FreshShop.Service.Impl.PaymentService;
 import com.freshfood.API_FreshShop.Entity.*;
@@ -21,6 +22,8 @@ public class SellController {
     @Autowired
     OrderRepository orderRepository;
 
+    @Autowired
+    InventoryRepository inventoryRepository;
 
     @GetMapping("/cart/{user_id}")
     ResponseEntity<ResponseObject> getCart(@PathVariable Long user_id){
@@ -34,8 +37,8 @@ public class SellController {
         );
     }
 
-    @PostMapping("/cart/{user_id}/{quantity}")
-    ResponseEntity<ResponseObject> addItemCart(@PathVariable Long user_id,@PathVariable int quantity, @RequestBody Inventory inventory){
+    @PostMapping("/cart/{user_id}/{productId}/{quantity}")
+    ResponseEntity<ResponseObject> addItemCart(@PathVariable Long user_id,@PathVariable int quantity, @PathVariable Long productId){
         Orders order = orderRepository.findByUser(user_id);
         if(order==null)
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
@@ -45,7 +48,14 @@ public class SellController {
             OrderItem orderItem = new OrderItem();
             orderItem.setOrders(order);
             orderItem.setQuantity(quantity);
-            orderItem.setInventory(inventory);
+            List<Inventory> list = inventoryRepository.getProductInInventory(productId);
+            if(list.size()>0) {
+                Inventory inventory= list.get(0);
+                orderItem.setInventory(inventory);
+            }
+            else ResponseEntity.status(HttpStatus.CREATED).body(
+                    new ResponseObject("success","Không tìm thấy sản phẩm "+productId.toString() +"trong kho","")
+            );
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     new ResponseObject("success","Thêm vào giỏ hàng thành công",repository.save(orderItem))
             );

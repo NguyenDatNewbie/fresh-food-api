@@ -2,10 +2,12 @@ package com.freshfood.API_FreshShop.Controller;
 
 import com.freshfood.API_FreshShop.Entity.Account;
 import com.freshfood.API_FreshShop.Entity.InfoUser;
+import com.freshfood.API_FreshShop.Entity.Orders;
 import com.freshfood.API_FreshShop.Entity.ResponseObject;
 import com.freshfood.API_FreshShop.Repository.AccountRepository;
 import com.freshfood.API_FreshShop.Repository.InfoUserRepository;
 import com.freshfood.API_FreshShop.Repository.OrderRepository;
+import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,6 +51,10 @@ public class UserController {
         infoUser.setAccount(checkAccount);
         try {
             InfoUser result = infoUserRepository.save(infoUser);
+            Orders orders = new Orders();
+            orders.setComplete(false);
+            orders.setUser(result);
+            orderRepository.save(orders);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("success", "Tạo tài khoản thành công", result));
         }

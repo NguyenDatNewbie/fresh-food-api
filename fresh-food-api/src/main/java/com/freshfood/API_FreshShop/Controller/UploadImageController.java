@@ -27,14 +27,14 @@ public class UploadImageController {
     ProductRepository productRepository;
 
 
-    @PostMapping("/fileupload/{option}/{id}")
+    @PostMapping("/fileupload/{option}")
     public ResponseEntity<?> uploadImageToFIleSystem(@RequestParam("file") MultipartFile file,
-                                                     @PathVariable Long id,
+                                                     @RequestParam Long id,
                                                      @PathVariable String option) throws IOException {
         if(option.compareTo("user") == 0) {
             InfoUser infoUser = cloudinaryService.uploadAvatar(id,file);
             if(infoUser!=null)
-            return ResponseEntity.status(HttpStatus.OK)
+                return ResponseEntity.status(HttpStatus.OK)
                     .body(repository.save(infoUser));
         }
         else if(option.compareTo("product")==0) {

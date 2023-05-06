@@ -36,12 +36,13 @@ public class ExpiredProductController {
             List<Inventory> inventoryList = inventoryRepository.getExpriedProduct();
             if (inventoryList.size() > 0) {
                 ExpiredProduct expiredProduct = new ExpiredProduct();
-                Inventory inventory = null;
+                Inventory inventory = new Inventory();
                 for (int i = 0; i < inventoryList.size(); i++) {
                     inventory = inventoryList.get(i);
                     expiredProduct.setInventory(inventory);
                     repository.save(expiredProduct);
-                    inventoryRepository.delete(inventory);
+                    if(inventory!=null)
+                     inventoryRepository.delete(inventory);
                 }
             }
             checkNewDate = true;
