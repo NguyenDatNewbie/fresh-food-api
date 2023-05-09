@@ -1,11 +1,6 @@
 package com.freshfood.API_FreshShop.Entity;
 
 import javax.persistence.*;
-import javax.persistence.criteria.Order;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @Entity
 @Table(name = "order_item")

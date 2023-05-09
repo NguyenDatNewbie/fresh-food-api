@@ -1,8 +1,11 @@
 package com.freshfood.API_FreshShop.Service.Impl;
 
+import com.freshfood.API_FreshShop.Entity.Inventory;
+import com.freshfood.API_FreshShop.Repository.InfoUserRepository;
 import com.freshfood.API_FreshShop.Service.IPaymentService;
 import com.freshfood.API_FreshShop.Entity.OrderItem;
 import com.freshfood.API_FreshShop.Entity.Product;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,4 +25,6 @@ public class PaymentService implements IPaymentService {
         }
         return total;
     }
+
+
 }

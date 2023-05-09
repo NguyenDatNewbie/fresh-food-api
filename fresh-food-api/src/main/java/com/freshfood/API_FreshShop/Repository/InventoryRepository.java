@@ -19,9 +19,14 @@ public interface InventoryRepository extends JpaRepository<Inventory,Long> {
     @Query("delete from Inventory i where i.product.id = ?1")
     void deleteAllProductById(Long id);
 
+    @Query("delete from Inventory i where i.quantity = 0")
+    void deleteInventoryByQuantity();
+
     @Query("SELECT i FROM Inventory i where curdate() > i.expirationDate")
     List<Inventory> getExpriedProduct();
 
-    @Query("SELECT i from Inventory i where i.product.id = ?1 order by i.expirationDate ASC")
-    List<Inventory> getProductInInventory(Long productId);
+    @Query("SELECT i from Inventory i where i.product.id = ?1 and i.quantity>=?2 order by i.expirationDate ASC")
+    List<Inventory> getProductInInventory(Long productId, int quantity);
+
+
 }

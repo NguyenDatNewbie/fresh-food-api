@@ -5,7 +5,7 @@ import javax.persistence.*;
 import javax.sound.sampled.Line;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
+import java.sql.Date;
 import java.util.List;
 
 @Entity
@@ -15,7 +15,6 @@ public class Orders {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name="order_id")
 	Long id;
-
 	@Column()
 	String address;
 	@Column()
