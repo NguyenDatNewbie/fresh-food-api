@@ -25,4 +25,6 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
 
     @Query("select p from Product p order by p.sold DESC")
     List<Product> getProductSold();
+
+    //product/sold   sản phẩm bán nhiều
 }

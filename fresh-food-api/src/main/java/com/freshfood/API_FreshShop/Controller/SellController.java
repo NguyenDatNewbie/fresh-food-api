@@ -1,12 +1,9 @@
 package com.freshfood.API_FreshShop.Controller;
 
-import com.freshfood.API_FreshShop.Repository.InfoUserRepository;
-import com.freshfood.API_FreshShop.Repository.InventoryRepository;
+import com.freshfood.API_FreshShop.Repository.*;
 import com.freshfood.API_FreshShop.Service.IPaymentService;
 import com.freshfood.API_FreshShop.Service.Impl.PaymentService;
 import com.freshfood.API_FreshShop.Entity.*;
-import com.freshfood.API_FreshShop.Repository.OrderItemRepository;
-import com.freshfood.API_FreshShop.Repository.OrderRepository;
 import com.mysql.cj.log.Log;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +31,9 @@ public class SellController {
     @Autowired
     InfoUserRepository infoUserRepository;
 
+    @Autowired
+    ProductRepository productRepository;
+
     @GetMapping("/cart/{user_id}")
     ResponseEntity<ResponseObject> getCart(@PathVariable Long user_id){
         Orders order = orderRepository.findByUser(user_id);
@@ -43,6 +43,21 @@ public class SellController {
             );
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("success","Xem giỏ hàng thành công",repository.getByOrder(order))
+        );
+    }
+
+    @PostMapping("/checkout/{user_id}")
+    ResponseEntity<ResponseObject> checkout(@PathVariable Long user_id,@RequestBody ProductQuantity productQuantity){
+        Orders orders = orderRepository.findByUser(user_id);
+        for(int i=0;i<productQuantity.getId().size();i++){
+            OrderItem orderItem = new OrderItem();
+            orderItem.setQuantity(productQuantity.getQuantity().get(i));
+            orderItem.setOrders(orders);
+            orderItem.setInventory(inventoryRepository.getProductInInventory(productQuantity.getId().get(i),orderItem.getQuantity()).get(0));
+            repository.save(orderItem);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("success","Xem giỏ hàng thành công","")
         );
     }
 
@@ -82,35 +97,6 @@ public class SellController {
         );
     }
 
-//    @PostMapping("/cart/{user_id}/{productId}/{quantity}")
-//    ResponseEntity<ResponseObject> addItemCart(@RequestBody Long user_id,@PathVariable int quantity, @PathVariable Long productId){
-//        Orders order = orderRepository.findByUser(user_id);
-//        if(order==null)
-//            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-//                    new ResponseObject("failed","Không tìm thấy user","")
-//            );
-//        try {
-//            OrderItem orderItem = new OrderItem();
-//            orderItem.setOrders(order);
-//            orderItem.setQuantity(quantity);
-//            List<Inventory> list = inventoryRepository.getProductInInventory(productId);
-//            if(list.size()>0) {
-//                Inventory inventory= list.get(0);
-//                orderItem.setInventory(inventory);
-//            }
-//            else ResponseEntity.status(HttpStatus.CREATED).body(
-//                    new ResponseObject("success","Không tìm thấy sản phẩm "+productId.toString() +"trong kho","")
-//            );
-//            return ResponseEntity.status(HttpStatus.CREATED).body(
-//                    new ResponseObject("success","Thêm vào giỏ hàng thành công",repository.save(orderItem))
-//            );
-//        }
-//        catch(Exception ex) {
-//            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-//                    new ResponseObject("failed", ex.getMessage(), "")
-//            );
-//        }
-//    }
 
     @PutMapping("/cart")
     List<OrderItem> updateCartItem(@RequestBody OrderItem orderItem, @RequestBody Orders orders)
@@ -147,10 +133,11 @@ public class SellController {
         for(int i =0;i<inventories.size();i++) {
             Inventory inventory = inventoryRepository.findOne(inventories.get(i));
             Integer quantity = quantityList.get(i);
-            List<OrderItem> orderItems = repository.checkExits(orders, inventory);
+            List<OrderItem> orderItems = repository.checkExits(orders, inventory.getProduct());
             OrderItem orderItem = new OrderItem();
             if(orderItems.size()>0){
                 orderItem = orderItems.get(0);
+                orderItem.setInventory(inventory);
                 orderItem.setQuantity(quantity);
             }
             else {
@@ -159,6 +146,9 @@ public class SellController {
                 orderItem.setQuantity(quantity);
             }
             repository.save(orderItem);
+            Product product = productRepository.findOne(inventory.getProduct().getId());
+            product.setSold(product.getSold()+quantity);
+            productRepository.save(product);
             int temp = inventory.getQuantity()-quantity;
             if(temp==0)
                 inventoryRepository.delete(inventory.getId());
