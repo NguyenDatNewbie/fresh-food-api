@@ -9,6 +9,6 @@ import java.util.List;
 
 
 public interface ExpiredProductRepository extends JpaRepository<ExpiredProduct,Long> {
-    @Query("select e from ExpiredProduct e where e.inventory.product.id = ?1")
+    @Query("select e from ExpiredProduct e where e.product.id = ?1")
     List<ExpiredProduct> getAllByProductId(Long productId);
 }

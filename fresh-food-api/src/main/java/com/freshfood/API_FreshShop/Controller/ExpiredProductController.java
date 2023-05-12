@@ -24,8 +24,14 @@ public class ExpiredProductController {
 
     Boolean checkNewDate = false;
 
-    Date newDate;
+    Date newDate=new Date(System.currentTimeMillis());
     @GetMapping("/load")
+    List<ExpiredProduct> getAll(){
+
+        loadOpen();
+
+        return repository.findAll();
+    }
     public void loadOpen(){
         Date currentDate = new Date(System.currentTimeMillis());
         if(newDate.compareTo(currentDate)!=0)
@@ -36,13 +42,17 @@ public class ExpiredProductController {
             List<Inventory> inventoryList = inventoryRepository.getExpriedProduct();
             if (inventoryList.size() > 0) {
                 ExpiredProduct expiredProduct = new ExpiredProduct();
-                Inventory inventory = new Inventory();
                 for (int i = 0; i < inventoryList.size(); i++) {
-                    inventory = inventoryList.get(i);
-                    expiredProduct.setInventory(inventory);
+                    Inventory inventory = inventoryList.get(i);
+                    expiredProduct.setProduct(inventory.getProduct());
+                    expiredProduct.setExpirationDate(inventory.getExpirationDate());
+                    expiredProduct.setQuantity(inventory.getQuantity());
+                    expiredProduct.setProductionDate(inventory.getProductionDate());
+                    expiredProduct.setUpdatedAt(inventory.getUpdatedAt());
+                    expiredProduct.setCreatedAt(inventory.getCreatedAt());
+                    inventoryRepository.delete(inventory);
                     repository.save(expiredProduct);
-                    if(inventory!=null)
-                     inventoryRepository.delete(inventory);
+
                 }
             }
             checkNewDate = true;

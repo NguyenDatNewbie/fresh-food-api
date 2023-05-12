@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +64,7 @@ public class SellController {
 
     @PostMapping("check")
     ResponseEntity<ResponseObject> checkProductInInventory(@RequestBody ProductQuantity productQuantity){
+        loadOpen();
         List<Long> idInventory = new ArrayList<>();
         List<Integer> quantityInventory = new ArrayList<>();
 
@@ -146,17 +148,43 @@ public class SellController {
                 orderItem.setQuantity(quantity);
             }
             repository.save(orderItem);
-            Product product = productRepository.findOne(inventory.getProduct().getId());
-            product.setSold(product.getSold()+quantity);
-            productRepository.save(product);
             int temp = inventory.getQuantity()-quantity;
-            if(temp==0)
-                inventoryRepository.delete(inventory.getId());
-            else
-            {
-                inventory.setQuantity(temp);
-                inventoryRepository.save(inventory);
+            inventory.setQuantity(temp);
+            inventoryRepository.save(inventory);
+
+        }
+    }
+
+    @Autowired
+    ExpiredProductRepository expiredProductRepository;
+    Boolean checkNewDate = false;
+
+    Date newDate=new Date(System.currentTimeMillis());
+    public void loadOpen(){
+        Date currentDate = new Date(System.currentTimeMillis());
+        if(newDate.compareTo(currentDate)!=0)
+            checkNewDate=false;
+        if(checkNewDate && newDate.compareTo(currentDate)==0)
+            return;
+        else {
+            List<Inventory> inventoryList = inventoryRepository.getExpriedProduct();
+            if (inventoryList.size() > 0) {
+                ExpiredProduct expiredProduct = new ExpiredProduct();
+                for (int i = 0; i < inventoryList.size(); i++) {
+                    Inventory inventory = inventoryList.get(i);
+                    expiredProduct.setProduct(inventory.getProduct());
+                    expiredProduct.setExpirationDate(inventory.getExpirationDate());
+                    expiredProduct.setQuantity(inventory.getQuantity());
+                    expiredProduct.setProductionDate(inventory.getProductionDate());
+                    expiredProduct.setUpdatedAt(inventory.getUpdatedAt());
+                    expiredProduct.setCreatedAt(inventory.getCreatedAt());
+                    inventoryRepository.delete(inventory);
+                    expiredProductRepository.save(expiredProduct);
+
+                }
             }
+            checkNewDate = true;
+            newDate = currentDate;
         }
     }
 }
